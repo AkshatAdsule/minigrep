@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fs;
+use std::env;
 use colored::*;
 
 pub struct Config {
@@ -8,14 +9,24 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &str> {
-        if args.len() < 3 {
-            return Err("Not enough arguments!");
-        }
+    pub fn new(mut args: env::Args) -> Result<Config, &'static str> {
+         args.next();
 
-        let query = args[1].clone();
-        let file = args[2].clone();
-        return Ok(Config { query, file });
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+
+        let file = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file name"),
+        };
+
+
+        Ok(Config {
+            query,
+            file
+        })
     }
 }
 
@@ -36,28 +47,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str>{
-    let mut matches = Vec::new();
-    for line in contents.lines() {
-        if line.contains(query) {
-            matches.push(line);
-        }
-    }
-    matches
-}
-
-pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut matches = Vec::new();
-    let query = query.to_lowercase();
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            matches.push(line);
-        }
-    }
-    matches
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 // Tests
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -71,20 +67,5 @@ safe, fast, productive.
 Pick three.";
 
         assert_eq!(vec!["safe, fast, productive."], search(query, contents))
-    }
-
-    #[test]
-    fn case_insensitive() {
-        let query = "rUsT";
-        let contents = "\
-Rust:
-safe, fast, productive.
-Pick three.
-Trust me.";
-
-        assert_eq!(
-            vec!["Rust:", "Trust me."],
-            search_case_insensitive(query, contents)
-        );
     }
 }
