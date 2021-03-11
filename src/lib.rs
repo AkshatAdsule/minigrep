@@ -1,7 +1,7 @@
+use colored::*;
+use std::env;
 use std::error::Error;
 use std::fs;
-use std::env;
-use colored::*;
 
 pub struct Config {
     query: String,
@@ -10,7 +10,7 @@ pub struct Config {
 
 impl Config {
     pub fn new(mut args: env::Args) -> Result<Config, &'static str> {
-         args.next();
+        args.next();
 
         let query = match args.next() {
             Some(arg) => arg,
@@ -22,11 +22,7 @@ impl Config {
             None => return Err("Didn't get a file name"),
         };
 
-
-        Ok(Config {
-            query,
-            file
-        })
+        Ok(Config { query, file })
     }
 }
 
@@ -46,7 +42,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str>{
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     contents
         .lines()
         .filter(|line| line.contains(query))
