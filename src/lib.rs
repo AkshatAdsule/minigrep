@@ -32,7 +32,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     let results = search(&config.query, &contents);
 
-    if results.len() == 0 {
+    if results.is_empty() {
         eprintln!("Could not find {}", &config.query.red())
     } else {
         for line in results {
@@ -43,9 +43,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    let query = query.to_lowercase();
     contents
         .lines()
-        .filter(|line| line.contains(query))
+        .filter(|line| line.to_lowercase().contains(&query))
         .collect()
 }
 
